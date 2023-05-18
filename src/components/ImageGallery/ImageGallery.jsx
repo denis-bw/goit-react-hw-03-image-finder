@@ -24,7 +24,6 @@ export class ImageGallery extends Component {
 
         if (prevProps.valueInput !== this.props.valueInput) {
             if (this.props.valueInput === "") {
-                this.setState({ loading: true })
                 return toast.error("Enter a valid value", {
                     position: toast.POSITION.TOP_CENTER
             })}
@@ -55,20 +54,21 @@ export class ImageGallery extends Component {
 
         if (prevProps.page !== this.props.page) {
 
+            let contentImput = this.props.valueInput;
             this.setState({loading: true})
             api(prevProps.valueInput, this.props.page).then(dataImage => this.setState(lastProp => {
-                console.log(this.state.total)
-                 console.log(this.state.data.length)
-    
+                
+                if (this.state.data.length === this.state.total) {
+                    toast.info("The End", {
+                        position: toast.POSITION.TOP_CENTER
+                    })
+                    contentImput = ''
+                }
                 return {
                     data: [...lastProp.data, ...dataImage.hits],
-                    value: this.props.valueInput}
+                    value: contentImput}
             })).finally(() => { this.setState({ loading: false }) });
-            
-            // if ( this.state.data.length === this.state.total) { this.setState({ value: '' }) }
-        }
-        
-        
+        }   
     }
 
     showModal = (imgLink) => {
@@ -80,11 +80,7 @@ export class ImageGallery extends Component {
         })
     }
 
-
     render() {
-
-        // console.log(this.state.total)
-        
         return <>
             {this.state.data && <ul className={css.ImageGallery}>
                 {this.state.data.map(el => {
@@ -101,8 +97,6 @@ export class ImageGallery extends Component {
             
             {this.state.show && <Modal onClose={this.showModal} imgLink={this.state.imgLink} />}
             </>
-        
-        
     };
 }
 
