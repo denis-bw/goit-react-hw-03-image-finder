@@ -10,3 +10,8 @@
     margin-left: auto;
     margin-right: auto;
 }
+
+.SpinerContainer {
+    display: flex;
+    justify-content: center;
+}

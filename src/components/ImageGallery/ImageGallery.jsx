@@ -2,32 +2,107 @@ import React, { Component } from "react";
 import {ImageGalleryItem} from '../ImageGalleryItem/ImageGalleryItem'
 import { api } from '../api/api';
 import css from './ImageGallery.module.css'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { Button } from '../Button/Button'
+import { InfinitySpin } from 'react-loader-spinner'
+import { Modal } from "components/Modal/Modal";
+  
 export class ImageGallery extends Component {
     state = {
         data: null,
-        status: '',
+        value: '',
+        loading: false,
+        total: 0,
+        show: false,
+        imgLink: ''
     }
-
     
+    #PER_PAGE = 12;
 
-    componentDidUpdate(prevProps, prevState) {
+    componentDidUpdate(prevProps) {
+
         if (prevProps.valueInput !== this.props.valueInput) {
-            // console.log(prevProps.valueInput)
-            // console.log(this.props.valueInput)
+            if (this.props.valueInput === "") {
+                this.setState({ loading: true })
+                return toast.error("Enter a valid value", {
+                    position: toast.POSITION.TOP_CENTER
+            })}
+            
+            this.setState({loading: true})
+            api(this.props.valueInput).then(data => {
+                
+                if (data.hits.length === 0) {
+                    this.setState({value: ''})
+                    toast.error("Nothing found", {
+                    position: toast.POSITION.TOP_CENTER
+                })
+                    return;
+                }
 
-            api(this.props.valueInput).then(dataImage => this.setState({
-                data: dataImage,
-            }));   
-        }    
+                this.setState({
+                    data: [...data.hits],
+                    value: this.props.valueInput,
+                    total: data.totalHits
+                })
+
+                if (data.total < this.#PER_PAGE) { this.setState({ value: '' }) }
+                
+            }).finally(() => {this.setState({loading: false})});   
+            
+            return;
+        }       
+
+        if (prevProps.page !== this.props.page) {
+
+            this.setState({loading: true})
+            api(prevProps.valueInput, this.props.page).then(dataImage => this.setState(lastProp => {
+                console.log(this.state.total)
+                 console.log(this.state.data.length)
+    
+                return {
+                    data: [...lastProp.data, ...dataImage.hits],
+                    value: this.props.valueInput}
+            })).finally(() => { this.setState({ loading: false }) });
+            
+            // if ( this.state.data.length === this.state.total) { this.setState({ value: '' }) }
+        }
+        
+        
     }
 
-    
+    showModal = (imgLink) => {
+        this.setState(({show}) => {
+            return {
+                show: !show,
+                imgLink: imgLink
+            }
+        })
+    }
+
+
     render() {
-        return this.state.data && <ul className={css.ImageGallery}>
-            {this.state.data.hits.map(el => {
-                 return <ImageGalleryItem key={el.id} altImg={el.tags} srcImg={el.webformatURL} />
-              })}
-         </ul>
+
+        // console.log(this.state.total)
+        
+        return <>
+            {this.state.data && <ul className={css.ImageGallery}>
+                {this.state.data.map(el => {
+                    return <ImageGalleryItem key={el.id} altImg={el.tags} srcImg={el.webformatURL} onClick={this.showModal} largeImageURL={el.largeImageURL} />
+                })}
+            </ul>}
+            <div className={css.SpinerContainer}>
+                {this.state.loading && <InfinitySpin
+                width='200'
+                color="#3f51b5"
+                />}
+            </div>
+            {this.state.value && <Button onClick={this.props.onClick} />} 
+            
+            {this.state.show && <Modal onClose={this.showModal} imgLink={this.state.imgLink} />}
+            </>
+        
         
     };
 }
+
