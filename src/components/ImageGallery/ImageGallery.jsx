@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Button } from '../Button/Button'
 import { InfinitySpin } from 'react-loader-spinner'
 import { Modal } from "components/Modal/Modal";
+import PropTypes from 'prop-types';
   
 export class ImageGallery extends Component {
     state = {
@@ -100,3 +101,8 @@ export class ImageGallery extends Component {
     };
 }
 
+ImageGallery.propTypes = {
+    valueInput: PropTypes.string.isRequired,
+    page: PropTypes.number.isRequired,
+    onClick: PropTypes.func.isRequired,
+};
