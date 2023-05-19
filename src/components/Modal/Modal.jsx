@@ -32,7 +32,7 @@ export class Modal extends Component {
     render() {
         return createPortal(<div onClick={this.handleClicBacldrop} className={css.Overlay}>
                     <div className={css.Modal}>
-                        <img  className={css.imgModal} src={this.props.imgLink} alt="" />
+                        <img  className={css.imgModal} src={this.props.largeImage} alt="" />
                     </div>
                 </div>, modalRoor)
     }
@@ -40,5 +40,5 @@ export class Modal extends Component {
 
 Modal.propTypes = {
     onClick: PropTypes.func,
-    imgLink: PropTypes.string.isRequired,
+    largeImage: PropTypes.string.isRequired,
 };
